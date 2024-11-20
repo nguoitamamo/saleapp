@@ -1,7 +1,23 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey,Enum
 from sqlalchemy.orm import relationship
 from saleapp import db, app
+from enum import Enum as Emun1
+import hashlib
+from flask_login import UserMixin
 
+class role(Emun1):
+    Admin = 1
+    User= 2
+
+
+
+class User(db.Model):
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(50), nullable=False)
+    username = Column (String(20), nullable=False, unique=True)
+    passw= Column(String(50), nullable=False)
+    Images = Column ( String(100), default='https://res.cloudinary.com/dxxwcby8l/image/upload/v1688179242/hclq65mc6so7vdrbp7hz.jpg')
+    role = Column ( Enum(role), default=role.User)
 
 class Category(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -22,12 +38,17 @@ class Product(db.Model):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        # c1 = Category(name='Mobile')
-        # c2 = Category(name='Desktop')
-        # c3 = Category(name='Tablet')
-        #
-        # db.session.add_all([c1, c2, c3])
-        # db.session.commit()
+
+        user = User ( name ="admin" , username = "admin", passw = str(hashlib.md5("123".encode('utf-8')).hexdigest()), role =role.Admin )
+        db.session.add(user)
+        db.session.commit()
+
+        c1 = Category(name='Mobile')
+        c2 = Category(name='Desktop')
+        c3 = Category(name='Tablet')
+
+        db.session.add_all([c1, c2, c3])
+        db.session.commit()
 
         products = [{
             "name": "iPhone 7 Plus",
